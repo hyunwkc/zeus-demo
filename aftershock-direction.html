@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aftershock redesign</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300..600&family=JetBrains+Mono:wght@400..600&display=swap" />
+<style>
+:root { --bg: #151518; --card: #1E1E22; --hi: #26262A; --ink: #EAEAEE; --ink2: #B8B8BF; --ink3: #9B9BA3; --hair: rgba(234,234,238,.09); --edge: rgba(234,234,238,.14); --danger: #E2553F; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 "DM Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 40px 32px 80px; }
+h1 { font-weight: 300; font-size: 44px; line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+h2 { font-weight: 300; font-size: 28px; margin: 0 0 6px; }
+h3 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+p { margin: 0; color: var(--ink2); }
+.mono { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--ink3); text-transform: uppercase; }
+.lead { font-size: 17px; max-width: 70ch; margin-top: 10px; }
+section { margin-top: 56px; }
+.sec-h { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+.sec-h p { max-width: 70ch; }
+.refs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.refs.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+figure { margin: 0; background: var(--card); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden; }
+figure img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--hi); }
+figcaption { padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+figcaption b { font-weight: 600; font-size: 14px; }
+figcaption span { color: var(--ink2); font-size: 13.5px; }
+.rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.rule { background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 14px 16px; }
+.rule p { font-size: 14px; }
+.bad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.bad div { border: 1px solid var(--hair); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; color: var(--ink2); }
+.bad b { display: block; color: var(--danger); font-weight: 600; font-size: 12px; margin-bottom: 4px; }
+.towns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.town { background: var(--card); border: 1px solid var(--hair); border-radius: 10px; padding: 12px 14px; }
+.town b { font-weight: 600; }
+.town p { font-size: 13px; margin-top: 2px; }
+.states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.states div { border-left: 2px solid var(--edge); padding: 4px 12px; font-size: 13.5px; color: var(--ink2); }
+.states b { color: var(--ink); display: block; font-weight: 600; }
+.turn { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.beat { background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 18px; }
+.beat ol { margin: 10px 0 0; padding-left: 18px; color: var(--ink2); font-size: 14px; display: flex; flex-direction: column; gap: 5px; }
+.hud { position: relative; aspect-ratio: 16/8; border-radius: 12px; overflow: hidden; border: 1px solid var(--hair);
+  background: radial-gradient(60% 70% at 50% 55%, #A7B98A 0 34%, #8FA97A 35% 40%, #7FA3A6 41% 100%); }
+.hud .tag { position: absolute; background: rgba(21,21,24,.86); border: 1px solid var(--edge); border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+.hud .tag small { display: block; color: var(--ink3); font-size: 11px; }
+.days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.days div { background: var(--card); border: 1px solid var(--hair); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; color: var(--ink2); }
+.days b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+.sw { display: flex; gap: 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--hair); }
+.sw div { flex: 1; height: 86px; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; font-size: 11px; font-family: "JetBrains Mono", monospace; }
+.pal { display: flex; flex-direction: column; gap: 12px; }
+.pal h3 { margin-top: 6px; }
+.tech { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tech ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink2); font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+code { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--ink); }
+.ask { margin-top: 56px; padding: 20px; border: 1px solid var(--edge); border-radius: 12px; background: var(--hi); }
+.ask ol { color: var(--ink2); margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 900px) { .refs, .refs.two, .rules, .turn, .tech, .towns, .days, .bad, .states { grid-template-columns: 1fr; } .wrap { padding: 24px 16px 60px; } h1 { font-size: 34px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="mono">Aftershock · redesign direction · from three research reports</span>
+  <h1>A small island you watch come back to life</h1>
+  <p class="lead">Built from how Mini Motorways, Islanders, Into the Breach, Rebel Inc. and the best bot competitions (Halite, Battlecode, Lux AI) solve exactly our problems. Research files: <code>zeus/research/aftershock-2026-11-01/</code></p>
+
+  <section>
+    <div class="sec-h"><h2>What was wrong</h2></div>
+    <div class="bad">
+      <div><b>A graph, not a place</b>Dark map, dots for towns, no geography you'd recognise.</div>
+      <div><b>Everything drawn at once</b>Every road, circle and label on screen all the time.</div>
+      <div><b>State in numbers</b>You had to read figures to know a town was dying.</div>
+      <div><b>Nothing moves</b>No traffic, no time passing, no consequence you could see.</div>
+      <div><b>A console look</b>Same family as 911 Operator, the one critics call a chore.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>1 · The world</h2><p>A tilted miniature island, light and warm by day, dark at night. You know every town by its shape.</p></div>
+    <div class="refs">
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1046030/ss_8c62b14de6d60916ff35a50000596bff79fadd71.1920x1080.jpg" alt="Islanders" /><figcaption><b>Islanders</b><span>The whole island fits on screen as a small low-poly model. Our base look.</span></figcaption></figure>
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1291340/ss_989ff1808d9416c7b22da3e16ee54874697b1cea.1920x1080.jpg" alt="Townscaper" /><figcaption><b>Townscaper</b><span>Towns made of small houses with crisp edges. Big shapes stay reliable, small ones vary.</span></figcaption></figure>
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/688420/ss_66e84cd65125d74fcad538bdc4c1585be8a957f1.1920x1080.jpg" alt="Bad North" /><figcaption><b>Bad North</b><span>Danger in one colour against a quiet island: fire and smoke for the quake.</span></figcaption></figure>
+    </div>
+    <div class="towns">
+      <div class="town"><b>Port Halden</b><p>Harbour, cranes, the depot yard where your trucks park</p></div>
+      <div class="town"><b>Old Town</b><p>Dense old blocks round a clock tower, the worst hit</p></div>
+      <div class="town"><b>Industrial Zone</b><p>Warehouses, chimneys, rail sidings</p></div>
+      <div class="town"><b>Riverside</b><p>Low houses along the delta, bridges</p></div>
+      <div class="town"><b>Saltmere</b><p>Fishing village, boats in the cove</p></div>
+      <div class="town"><b>University</b><p>A campus quad and a stadium (later: camp site)</p></div>
+      <div class="town"><b>Valley Farms</b><p>Fields in strips, barns, a farm track</p></div>
+      <div class="town"><b>Hill Villages</b><p>Scattered roofs on snowy slopes, one pass in</p></div>
+    </div>
+    <div class="states">
+      <div><b>Standing</b>Roofs intact, smoke from chimneys, lit windows at night</div>
+      <div><b>Damaged</b>Tilted roofs, dust, a column of smoke</div>
+      <div><b>Collapsed</b>Rubble, fire at night. Rescue teams visibly digging</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>2 · Reading the map</h2><p>Roads stay quiet and danger is loud. Trouble shows on the town itself, never in a legend.</p></div>
+    <div class="refs">
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/287980/ss_540acc2e1e630b059c20e2887a22ca61eb323afe.1920x1080.jpg" alt="Mini Metro" /><figcaption><b>Mini Metro</b><span>One line weight, a pale background, colour only where it matters.</span></figcaption></figure>
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1127500/ss_605e3ca3cea0ce5dd5d784e51afd7a1b681f9443.1920x1080.jpg" alt="Mini Motorways" /><figcaption><b>Mini Motorways</b><span>Pins stack on a building that needs help, and a timer fills on it. Our town alerts work the same way.</span></figcaption></figure>
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/590380/ss_4b985c7747c1ff0b7fbbf3eaf8ca5a1272f0dadb.1920x1080.jpg" alt="Into the Breach" /><figcaption><b>Into the Breach</b><span>Shows what will happen before you commit. Our aftershock warnings and road risks work the same way.</span></figcaption></figure>
+    </div>
+    <div class="rules">
+      <div class="rule"><h3>Pins and a ring on every town in trouble</h3><p>Up to 3 pin types above the town (trapped, hurt, cold), each a small stack. A ring around it fills toward the deaths it will have next turn.</p></div>
+      <div class="rule"><h3>One danger colour</h3><p>Warm red, used only for people dying. Everything else stays land and sea.</p></div>
+      <div class="rule"><h3>Roads only when they matter</h3><p>At rest roads are thin, quiet ribbons. A damaged road shows cracks and cones, a closed one a gap with rubble. The routes light up only while you're sending someone.</p></div>
+      <div class="rule"><h3>Hover for detail</h3><p>One card with the numbers. The map never shows a table.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>3 · A turn</h2><p>Two beats. You plan in calm, then you watch 6 hours happen.</p></div>
+    <div class="turn">
+      <div class="beat"><span class="mono">Beat 1 · plan (paused)</span><h3 style="margin-top:6px">Drag a team onto a town</h3>
+        <ol><li>Team tokens wait in a tray at the depot.</li><li>Drag one onto a town. Its route lights up with the arrival time and the odds ("arrives 09:30 · 7 in 10").</li><li>Drop it: a bounce and a sound, and a little truck pulls out of the depot yard.</li><li>Aftershock zones and roads at risk are marked a turn ahead.</li><li>Undo anything until you end the turn.</li></ol></div>
+      <div class="beat"><span class="mono">Beat 2 · resolve (6 seconds)</span><h3 style="margin-top:6px">Watch it play out</h3>
+        <ol><li>The sun sweeps across the sky through the 6 hours; night turns go dark, with lit windows.</li><li>Trucks and helicopters drive their routes. A stuck truck stops with a puff of dust.</li><li>"+12 pulled out" pops over a town and the people-saved count ticks up.</li><li>An aftershock shakes the camera, dust rises, and a road cracks in front of you.</li><li>At most one event card: "Bridge at Linden collapsed".</li></ol></div>
+    </div>
+    <div class="refs two" style="margin-top:16px">
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/874390/ss_ee24e2157cbf45d55c304bbdd7802b915e0c378b.1920x1080.jpg" alt="Polytopia" /><figcaption><b>The Battle of Polytopia</b><span>Four buttons on screen. End Turn is the biggest and the only one that moves time.</span></figcaption></figure>
+      <figure><img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/323190/ss_03fc3089daf0785e3bf34b32c385e80defefaeb4.1920x1080.jpg" alt="Frostpunk" /><figcaption><b>Frostpunk</b><span>A single story card makes the numbers feel like people.</span></figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>4 · The screen</h2><p>The island fills it, with HUD only in the corners.</p></div>
+    <div class="hud">
+      <div class="tag" style="left:16px;top:16px"><small>People saved</small><b>1,284</b></div>
+      <div class="tag" style="right:16px;top:16px"><small>Day 2 · turn 6</small><b>10:00 → 16:00 ☀</b></div>
+      <div class="tag" style="left:50%;bottom:16px;transform:translateX(-50%)"><small>At the depot</small><b>6 rescue · 4 medical · 2 engineers · 9 trucks</b></div>
+      <div class="tag" style="right:16px;bottom:16px;background:#EAEAEE;color:#151518;font-weight:600">End turn ↵</div>
+      <div class="tag" style="left:42%;top:38%"><small>Old Town · hover card</small>612 trapped · ring 70% full</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>5 · Learning it</h2><p>One new thing per day. You play by hand first, and the bot comes once you've felt the job.</p></div>
+    <div class="days">
+      <div><b>Day 1</b>One town, rescue teams only. Drag, end turn, watch people come out.</div>
+      <div><b>Day 2</b>Roads break. Trucks with water and food; one road closes in front of you.</div>
+      <div><b>Day 3</b>Medical teams and a field hospital.</div>
+      <div><b>Day 4</b>Snow. Tents and camps before nightfall.</div>
+      <div><b>Day 5 →</b>The whole island. Then "write a bot that does this", starting from your own clicks.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>6 · Bots and replays</h2><p>Battlecode's top teams spent more time watching replays than writing code, so the viewer is the product.</p></div>
+    <div class="refs">
+      <figure><img src="https://i.imgur.com/XWXW3cJ.png" alt="Lux Eye" /><figcaption><b>Lux AI · Lux Eye</b><span>Map in the middle, players on the sides, and a scrubber shaded day and night. Our replay layout.</span></figcaption></figure>
+      <figure><img src="https://news.mit.edu/sites/default/files/styles/news_article__image_gallery/public/images/202303/MIT-Battlecode-01-PRESS_0.jpg?itok=RSPDXUje" alt="Battlecode" /><figcaption><b>Battlecode (MIT)</b><span>Readable little units and arrows that show intent.</span></figcaption></figure>
+      <figure><img src="https://i.imgur.com/9r4xxOU.png" alt="Halite III viewer" /><figcaption><b>Halite III viewer</b><span>A live ledger beside the map. Two Sigma fast-tracked hiring for the top tier.</span></figcaption></figure>
+    </div>
+    <div class="rules">
+      <div class="rule"><h3>The same island, played by your bot</h3><p>A replay uses the exact animations from playing by hand. Click a truck to see why the bot sent it.</p></div>
+      <div class="rule"><h3>Ghost compare</h3><p>Your last bot's trucks run faded alongside the new one, so you see what changed.</p></div>
+      <div class="rule"><h3>Your clicks become a starter bot</h3><p>"Export my day as code" turns what you did by hand into a working bot. First score in under 10 minutes.</p></div>
+      <div class="rule"><h3>Trustworthy scores</h3><p>Fresh hidden islands each season, many seeds per island, a spread band on the board. Prosperity had to re-run rounds after exploits.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>7 · Colour</h2><p>The island gets its own warm palette and turns dark at night. The Zeus app around it stays Storm.</p></div>
+    <div class="pal">
+      <h3>Day</h3>
+      <div class="sw">
+        <div style="background:#7FA3A6;color:#151518">sea #7FA3A6</div><div style="background:#A9C7C3;color:#151518">shallows #A9C7C3</div>
+        <div style="background:#E6D7B8;color:#151518">sand #E6D7B8</div><div style="background:#A7B98A;color:#151518">grass #A7B98A</div>
+        <div style="background:#6E8A62;color:#F2F1EC">forest #6E8A62</div><div style="background:#9C9A92;color:#151518">rock #9C9A92</div>
+        <div style="background:#F2F1EC;color:#151518">snow #F2F1EC</div><div style="background:#EFE6D6;color:#151518">walls #EFE6D6</div>
+        <div style="background:#C9785C;color:#151518">roofs #C9785C</div><div style="background:#E2553F;color:#F2F1EC">danger #E2553F</div>
+      </div>
+      <h3>Night</h3>
+      <div class="sw">
+        <div style="background:#1C252C;color:#B8B8BF">sea #1C252C</div><div style="background:#2A3530;color:#B8B8BF">land #2A3530</div>
+        <div style="background:#3A4048;color:#EAEAEE">rock #3A4048</div><div style="background:#F0D9A8;color:#151518">lit window #F0D9A8</div>
+        <div style="background:#E2553F;color:#F2F1EC">fire / danger #E2553F</div><div style="background:#151518;color:#B8B8BF">Zeus chrome #151518</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>8 · How it gets built</h2></div>
+    <div class="tech">
+      <div class="rule"><h3>three.js, not deck.gl</h3><p>deck.gl is built for data maps, which is why it came out a dashboard. three.js via React Three Fiber does lighting, shadows, water, a miniature camera and animation.</p>
+        <ul><li><code>three@0.187.0</code>, <code>@react-three/fiber@9.8.2</code>, <code>@react-three/drei@10.7.9</code></li><li><code>@react-three/postprocessing@3.2.2</code> + <code>postprocessing@6.39.5</code> (ambient occlusion, tilt-shift)</li><li><code>simplex-noise@4.0.3</code>, <code>maath@0.10.8</code>; dev <code>@types/three</code>, <code>@gltf-transform/cli</code></li><li>All MIT. deck.gl comes back out.</li></ul></div>
+      <div class="rule"><h3>Free model packs (CC0, no credit needed)</h3><p>Downloaded once, slimmed with gltf-transform, kept under ~1.5 MB total.</p>
+        <ul><li>Kenney Car Kit (~3.4 MB): trucks, ambulance, fire truck</li><li>Kenney City Kit Suburban (~1.9 MB) + Commercial: houses, shops</li><li>Kenney Survival Kit (~1.8 MB): tents, crates for camps</li><li>Kenney Nature Kit (~10.5 MB): trees, rocks</li><li>Helicopter and collapsed buildings are made in code</li></ul></div>
+    </div>
+    <div class="days" style="margin-top:16px">
+      <div><b>Step 1</b>An empty, beautiful island: terrain, water, light, camera.</div>
+      <div><b>Step 2</b>Towns in their 3 states, roads as ribbons, trees.</div>
+      <div><b>Step 3</b>Trucks, teams and helicopters driving; drag-to-dispatch.</div>
+      <div><b>Step 4</b>The resolve beat: day/night, quake shake, dust, "+N".</div>
+      <div><b>Step 5</b>Day-by-day teaching, then the bot replay on the same scene.</div>
+    </div>
+  </section>
+
+  <div class="ask">
+    <span class="mono">Before building</span>
+    <ol>
+      <li>Approve this direction (or say what to change).</li>
+      <li>OK to download the four Kenney packs above (CC0, ~17 MB total, from kenney.nl / kenney-assets.itch.io) into <code>zeus/web/public/models/</code>?</li>
+      <li>OK to install the three.js packages and remove deck.gl?</li>
+    </ol>
+  </div>
+</div>
+</body>
+</html>
